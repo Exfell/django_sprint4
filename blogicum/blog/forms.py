@@ -9,6 +9,9 @@ class PostForm(forms.ModelForm):
         model = Post
         exclude = ('author',)
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['location'].required = False
 
 class CommentForm(forms.ModelForm):
 
