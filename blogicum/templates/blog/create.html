@@ -22,23 +22,42 @@
         {% endif %}
       </div>
       <div class="card-body">
+        {% if '/delete/' in request.path %}
+          <!-- Предупреждение при удалении -->
+          <div class="alert alert-danger mb-3">
+            ⚠️ ВНИМАНИЕ! Вы уверены, что хотите удалить эту публикацию?<br>
+            Действие необратимо — все комментарии также будут удалены.
+          </div>
+        {% endif %}
+
         <form method="post" enctype="multipart/form-data">
           {% csrf_token %}
+
           {% if not '/delete/' in request.path %}
+            <!-- Редактирование / Создание — показываем форму -->
             {% bootstrap_form form %}
           {% else %}
-            <article>
+            <!-- Удаление — показываем пост для подтверждения -->
+            <article class="border p-3 mb-3">
               {% if form.instance.image %}
                 <a href="{{ form.instance.image.url }}" target="_blank">
                   <img class="border-3 rounded img-fluid img-thumbnail mb-2" src="{{ form.instance.image.url }}">
                 </a>
               {% endif %}
-              <p>{{ form.instance.pub_date|date:"d E Y" }} | {% if form.instance.location and form.location.is_published %}{{ form.instance.location.name }}{% else %}Планета Земля{% endif %}<br>
+              <p><strong>Дата:</strong> {{ form.instance.pub_date|date:"d E Y" }} |
+              <strong>Место:</strong> {% if form.instance.location and form.instance.location.is_published %}{{ form.instance.location.name }}{% else %}Планета Земля{% endif %}</p>
               <h3>{{ form.instance.title }}</h3>
               <p>{{ form.instance.text|linebreaksbr }}</p>
             </article>
           {% endif %}
-          {% bootstrap_button button_type="submit" content="Отправить" %}
+
+          <!-- Кнопка с разным текстом и стилем в зависимости от действия -->
+          {% if '/delete/' in request.path %}
+            {% bootstrap_button button_type="submit" content="🗑️ Да, удалить" button_class="btn-danger" %}
+            <a href="{% url 'blog:post_detail' form.instance.id %}" class="btn btn-secondary">Отмена</a>
+          {% else %}
+            {% bootstrap_button button_type="submit" content="💾 Сохранить" button_class="btn-primary" %}
+          {% endif %}
         </form>
       </div>
     </div>
